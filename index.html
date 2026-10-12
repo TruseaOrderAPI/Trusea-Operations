@@ -1,348 +1,315 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TruSea Delivery</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TruSea Ops</title>
 <style>
-:root{--deep:#06303f;--sea:#0e7c86;--foam:#e9f4f3;--sand:#f7f5ef;--ink:#12252d;--mute:#5d7178;--line:#d5e2e2;--coral:#e8674f;
---c-pend:#e08a1e;--c-out:#2a6fdb;--c-del:#1f9d55;--c-can:#d13b3b}
+:root{--navy:#0b2545;--teal:#13a89e;--teal-d:#0e857d;--bg:#f4f6f8;--line:#dfe5ec;--mute:#667585;--red:#c0392b;--amber:#b7791f;--green:#1e8449}
 *{box-sizing:border-box}
-body{margin:0;font-family:"Trebuchet MS","Segoe UI",sans-serif;background:var(--sand);color:var(--ink);font-size:15px}
+body{margin:0;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#1b2733}
+.top{background:var(--navy);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.top b{font-size:17px}.top small{display:block;color:#b9c6d8}
+.wrap{max-width:900px;margin:0 auto;padding:12px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{flex:1;min-width:80px;padding:13px 8px;border:0;background:none;font:inherit;color:var(--mute);border-bottom:3px solid transparent}
+.tabs button.on{color:var(--navy);font-weight:600;border-bottom-color:var(--teal)}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 8px;color:var(--navy)}
 button,input,select,textarea{font:inherit}
-.hide{display:none!important}
-.brand{font-family:Georgia,"Times New Roman",serif;letter-spacing:.14em;font-weight:700}
-header{background:var(--deep);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
-header .brand{font-size:22px}header small{display:block;color:#9fc7c9;font-size:11px;letter-spacing:.04em}
-header .sp{flex:1}
-.wrap{max-width:1000px;margin:0 auto;padding:14px}
-.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;background:var(--sea);color:#fff;text-decoration:none;display:inline-block;text-align:center}
-.btn.alt{background:var(--foam);color:var(--deep)}.btn.warn{background:var(--coral)}.btn.ok{background:var(--c-del)}.btn.ghost{background:transparent;border:1px solid #ffffff55;color:#fff;padding:7px 10px}
-.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f2b84b;outline-offset:1px}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:57px;z-index:19}
-.tabs button{flex:1;padding:12px;border:0;background:none;font-weight:700;color:var(--mute);border-bottom:3px solid transparent;cursor:pointer}
-.tabs button.on{color:var(--sea);border-color:var(--sea)}
-#login{min-height:100vh;display:grid;place-items:center;background:linear-gradient(170deg,var(--deep),#0b5560);padding:16px}
-.lbox{background:#fff;border-radius:16px;padding:26px;width:100%;max-width:360px}
-.lbox h1{margin:0;color:var(--deep);font-size:32px;text-align:center}
-.lbox p.sub{text-align:center;color:var(--mute);margin:2px 0 18px}
-.seg{display:flex;gap:6px;margin-bottom:14px}.seg button{flex:1;padding:10px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:700;cursor:pointer}
-.seg button.on{background:var(--deep);color:#fff;border-color:var(--deep)}
-label{display:block;font-weight:700;font-size:13px;margin:10px 0 4px}
-input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}
-.err{color:var(--c-can);min-height:20px;font-size:13px}
-.hint{font-size:12px;color:var(--mute);margin-top:10px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
-.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
-.stat b{display:block;font-size:24px;color:var(--deep)}.stat span{color:var(--mute);font-size:13px}
-.stat.big{background:var(--deep);border:0}.stat.big b,.stat.big span{color:#fff}
-.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
-.panel h3,h2{margin:0 0 8px;color:var(--deep)}
-.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;color:#fff}
-.on-b{background:var(--c-del)}.off-b{background:var(--c-can)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
-.card{background:#fff;border:1px solid var(--line);border-left:6px solid var(--c-pend);border-radius:12px;padding:14px;cursor:pointer}
-.card.s-Out{border-left-color:var(--c-out)}.card.s-Delivered{border-left-color:var(--c-del)}.card.s-Cancelled{border-left-color:var(--c-can)}
-.card .top{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--sea)}
-.card h4{margin:6px 0 2px;font-size:19px;text-transform:uppercase}
-.card .row{color:var(--mute);margin:2px 0}
-.card .amt{font-size:20px;font-weight:700;margin:6px 0}
-.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.acts .btn{flex:1;min-width:110px;padding:10px 8px;font-size:13px}
-.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}.chips button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;cursor:pointer}
-.chips button.on{background:var(--deep);color:#fff}
-#map{height:calc(100vh - 150px);min-height:360px;border-radius:12px;border:1px solid var(--line)}
-#modal{position:fixed;inset:0;background:#06303fcc;z-index:50;display:flex;align-items:flex-end;justify-content:center}
-#modal .sheet{background:#fff;width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
-@media(min-width:600px){#modal{align-items:center}#modal .sheet{border-radius:18px}}
-.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--foam)}.kv span{color:var(--mute)}
-.radio{display:flex;gap:10px}.radio label{flex:1;border:2px solid var(--line);border-radius:10px;padding:12px;text-align:center;cursor:pointer;margin:0}
-.radio input{width:auto;margin-right:6px}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--deep);color:#fff;padding:10px 16px;border-radius:10px;z-index:99}
-.empty{text-align:center;color:var(--mute);padding:30px}
+.btn{min-height:48px;padding:10px 16px;border:0;border-radius:8px;background:var(--teal);color:#fff;width:100%;margin-top:8px}
+.btn.sec{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.red{background:var(--red)}.btn.sm{width:auto;min-height:40px;margin-top:0;padding:6px 12px}
+.btn:disabled{opacity:.5}
+input,select,textarea{width:100%;min-height:46px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.mute{color:var(--mute);font-size:14px}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:13px;font-weight:600;background:#eee;color:#555}
+.b-Pending,.b-Failed,.b-NONE{background:#fde8e6;color:var(--red)}.b-Assigned{background:#e6eefb;color:#2b5aa8}
+.b-Out{background:#d9f0ee;color:var(--teal-d)}.b-Delivered,.b-IN{background:#e3f4ea;color:var(--green)}.b-late{background:#fff1d6;color:var(--amber)}
+.msg{position:sticky;top:0;z-index:5;padding:10px 12px;border-radius:8px;margin-bottom:10px;background:#e3f4ea;color:var(--green)}
+.msg.err{background:#fde8e6;color:var(--red)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}.kpi b{display:block;font-size:22px;color:var(--navy)}.kpi small{color:var(--mute)}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--mute);font-size:12px;text-transform:uppercase}
+.gate{padding:40px 20px;text-align:center}.gate h2{font-size:20px}
+.dlg{position:fixed;inset:0;background:rgba(11,37,69,.5);display:flex;align-items:center;justify-content:center;padding:14px;z-index:20}
+.dlg>div{background:#fff;border-radius:12px;padding:16px;width:100%;max-width:420px}
+.items{margin:6px 0;padding-left:18px}
+a{color:var(--teal-d)}
 </style>
 </head>
 <body>
-
-<div id="login">
- <div class="lbox">
-  <h1 class="brand">TRUSEA</h1>
-  <p class="sub">Fresh Fish &amp; Prawns Delivery</p>
-  <div class="seg"><button id="rb" class="on" onclick="setRole('boy')">Delivery</button><button id="ra" onclick="setRole('admin')">Office</button></div>
-  <label for="uid">Mobile number / Employee ID</label><input id="uid" autocomplete="username">
-  <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
-  <div class="err" id="lerr"></div>
-  <button class="btn" style="width:100%" onclick="login()">Log in</button>
-  <div class="hint">Demo logins: delivery <b>ravi / 1234</b>, office <b>admin / admin123</b>. Change these in CFG.USERS.</div>
- </div>
-</div>
-
-<div id="app" class="hide">
- <header>
-  <div><div class="brand" id="ttl">TRUSEA</div><small id="sub">Fresh Fish &amp; Prawns Delivery</small></div>
-  <div class="sp"></div>
-  <span class="badge off-b" id="shareB">Location Sharing: OFF</span>
-  <button class="btn ghost" onclick="logout()">Log out</button>
- </header>
- <nav class="tabs" id="tabs"></nav>
- <div class="wrap">
-  <div id="view"></div>
-  <div id="mapv" class="hide"><div id="map"></div></div>
- </div>
-</div>
-
-<div id="modal" class="hide" onclick="if(event.target===this)closeM()"><div class="sheet" id="sheet"></div></div>
-
+<div id="app"></div>
 <script>
-/* ============ CONFIG ============ */
-const CFG={
-  API:'', // Paste your Google Apps Script web app URL here (see setup notes at bottom). Empty = demo mode.
-  USERS:{admin:{pw:'admin123',role:'admin',name:'Office'},ravi:{pw:'1234',role:'boy',name:'Ravi'}},
-  POLL:15000, LOC_MS:20000, STALE_MS:90000
-};
-const ST={Pending:'🟠',Out:'🔵',Delivered:'🟢',Cancelled:'🔴'};
-const LBL={Pending:'Pending',Out:'Out for Delivery',Delivered:'Delivered',Cancelled:'Cancelled'};
-const $=id=>document.getElementById(id);
-const inr=n=>'₹'+Number(n||0).toLocaleString('en-IN');
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let S={user:null,role:'boy',orders:[],loc:null,tab:'dash',filter:'All',geo:'off',map:null,layer:null,timers:[]};
+/* TruSea Ops - frontend (ONE file). Paste your Apps Script Web App URL below.
+   Nothing is stored in the browser: all data lives in the Google Sheet (source of truth).
+   The login token is kept only in memory, so reloading the page asks for the PIN again. */
+const API_URL = 'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
 
-/* ============ DATA LAYER ============ */
-const today=()=>new Date().toISOString().slice(0,10);
-const DEMO=()=>[
- {no:'ORDER 1',name:'Antony',mobile:'9876543210',address:'Thoraipakkam, Chennai',lat:12.9416,lng:80.2361,amount:850,status:'Pending',collected:0,method:'',date:today(),time:'',boy:'Ravi',remarks:''},
- {no:'ORDER 2',name:'Ajith',mobile:'9876543211',address:'Thadiyur, Tamil Nadu',lat:13.2410,lng:80.1010,amount:720,status:'Pending',collected:0,method:'',date:today(),time:'',boy:'Ravi',remarks:''},
- {no:'ORDER 3',name:'Maciola',mobile:'9876543212',address:'Thoraipakkam, Chennai',lat:12.9350,lng:80.2410,amount:950,status:'Delivered',collected:950,method:'UPI',date:today(),time:'09:40',boy:'Ravi',remarks:''}];
-function normStatus(s){s=String(s||'').toLowerCase();return s.startsWith('out')?'Out':s.startsWith('deliv')?'Delivered':s.startsWith('cancel')?'Cancelled':'Pending'}
-function fromSheet(r){return{no:String(r.ordernumber||r.no||'').toUpperCase(),name:r.customername||r.name||'',mobile:String(r.mobilenumber||r.mobile||''),address:r.address||'',
- lat:parseFloat(r.latitude??r.lat)||null,lng:parseFloat(r.longitude??r.lng)||null,amount:Number(String(r.orderamount??r.amount??0).replace(/[^\d.]/g,''))||0,
- status:normStatus(r.deliverystatus||r.status),collected:Number(String(r.amountcollected??r.collected??0).replace(/[^\d.]/g,''))||0,method:r.paymentmethod||r.method||'',
- date:String(r.deliverydate||r.date||'').slice(0,10),time:r.deliverytime||r.time||'',boy:r.deliveryboy||r.boy||'',remarks:r.remarks||''}}
-async function loadAll(){
-  try{
-    if(CFG.API){
-      const j=await (await fetch(CFG.API+'?action=all')).json();
-      S.orders=(j.orders||[]).map(fromSheet).filter(o=>o.no);S.loc=j.location||null;
-    }else{
-      let d=localStorage.getItem('ts_orders');if(!d){d=JSON.stringify(DEMO());localStorage.setItem('ts_orders',d)}
-      S.orders=JSON.parse(d);S.loc=JSON.parse(localStorage.getItem('ts_loc')||'null');
-    }
-  }catch(e){toast('Could not reach Google Sheet. Check the API link.')}
-  render();
-}
-async function saveOrder(no,patch){
-  Object.assign(S.orders.find(o=>o.no===no),patch);
-  if(CFG.API){
-    try{await fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',no,patch})})}
-    catch(e){toast('Save failed. Check your connection and try again.')}
-  }else localStorage.setItem('ts_orders',JSON.stringify(S.orders));
-  render();
-}
-async function pushLoc(p){
-  const loc={name:S.user.name,lat:p.coords.latitude,lng:p.coords.longitude,ts:Date.now()};S.loc=loc;
-  if(CFG.API){try{await fetch(CFG.API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'loc',loc})})}catch(e){}}
-  else localStorage.setItem('ts_loc',JSON.stringify(loc));
-}
+const S = { token: null, user: null, cfg: { intervalSec: 60 }, att: { state: 'NONE' }, loc: { ok: null, msg: '' },
+  staffList: null, tab: 'today', busy: false, msg: null, date: '', month: '', orders: null, noDate: 0, team: null,
+  report: null, myMonth: null, filter: 'ALL', loading: false, error: '' };
 
-/* ============ LOGIN ============ */
-function setRole(r){S.role=r;$('rb').classList.toggle('on',r==='boy');$('ra').classList.toggle('on',r==='admin')}
-function login(){
-  const u=CFG.USERS[$('uid').value.trim().toLowerCase()];
-  if(!u||u.pw!==$('pw').value||u.role!==S.role){$('lerr').textContent='Wrong ID, password or role. Check and try again.';return}
-  S.user=u;S.tab=u.role==='admin'?'dash':'route';
-  sessionStorage.setItem('ts_user',$('uid').value.trim().toLowerCase());start();
-}
-function start(){
-  $('login').classList.add('hide');$('app').classList.remove('hide');
-  const boy=S.user.role==='boy';
-  $('ttl').textContent=boy?'TRUSEA DELIVERY':'TRUSEA';
-  $('tabs').innerHTML=boy?tab('route',"Today's Delivery")+tab('map','Map'):tab('dash','Dashboard')+tab('orders','Orders')+tab('map','Live Map');
-  $('shareB').classList.toggle('hide',!boy);
-  loadAll();S.timers.push(setInterval(loadAll,CFG.POLL));
-  if(boy)startGeo();
-}
-const tab=(k,l)=>`<button data-t="${k}" onclick="go('${k}')">${l}</button>`;
-function logout(){S.timers.forEach(clearInterval);if(S.watch!=null)navigator.geolocation.clearWatch(S.watch);sessionStorage.removeItem('ts_user');location.reload()}
-function go(t){S.tab=t;render()}
+const $ = s => document.querySelector(s);
+const h = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ist = () => new Date(Date.now() + 19800000).toISOString();
+const today = () => ist().slice(0, 10);
+const tm = s => s ? String(s).slice(11, 16) : '-';
+const dm = s => s ? String(s).slice(8, 10) + '-' + String(s).slice(5, 7) : '-';
+const mapLink = (a, b) => (a === '' || a == null) ? '-' : '<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=' + a + ',' + b + '">map</a>';
 
-/* ============ LOCATION SHARING (delivery boy) ============ */
-function setShare(on){S.geo=on?'on':'off';const b=$('shareB');b.textContent='Location Sharing: '+(on?'ON':'OFF');b.className='badge '+(on?'on-b':'off-b')}
-function startGeo(){
-  if(!navigator.geolocation){setShare(false);toast('This browser cannot share location.');return}
-  let last=0;
-  S.watch=navigator.geolocation.watchPosition(p=>{setShare(true);if(Date.now()-last>CFG.LOC_MS){last=Date.now();pushLoc(p)}},
-   e=>{setShare(false);toast(e.code===1?'Location blocked. Allow location in browser settings to share it with the office.':'Cannot get GPS position. Move to open sky and retry.')},
-   {enableHighAccuracy:true,maximumAge:10000,timeout:20000});
-}
-$('shareB').onclick=()=>{if(S.geo!=='on')startGeoRetry()};
-function startGeoRetry(){if(S.watch!=null)navigator.geolocation.clearWatch(S.watch);startGeo()}
-
-/* ============ HELPERS ============ */
-const mine=()=>S.user.role==='admin'?S.orders:S.orders.filter(o=>o.boy.toLowerCase()===S.user.name.toLowerCase());
-const navUrl=o=>{const d=o.lat&&o.lng?`${o.lat},${o.lng}`:encodeURIComponent(o.address);return`https://www.google.com/maps/dir/?api=1&destination=${d}&travelmode=driving`+(S.user&&S.user.role==='boy'?'':'')}
-const isLive=()=>S.user.role==='boy'?S.geo==='on':S.loc&&Date.now()-S.loc.ts<CFG.STALE_MS;
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
-function closeM(){$('modal').classList.add('hide')}
-function openM(h){$('sheet').innerHTML=h;$('modal').classList.remove('hide')}
-const stop=e=>e&&e.stopPropagation();
-
-/* ============ RENDER ============ */
-function render(){
-  if(!S.user)return;
-  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.tab));
-  const isMap=S.tab==='map';
-  $('view').classList.toggle('hide',isMap);$('mapv').classList.toggle('hide',!isMap);
-  if(isMap){drawMap();return}
-  const os=mine();
-  $('view').innerHTML=S.tab==='dash'?dash(os):S.tab==='orders'?ordersView(os):routeView(os);
-}
-function dash(os){
-  const t=os.filter(o=>!o.date||o.date===today()),c=s=>t.filter(o=>o.status===s).length;
-  const del=os.filter(o=>o.status==='Delivered'),sum=m=>del.filter(o=>o.method===m).reduce((a,o)=>a+o.collected,0),tot=del.reduce((a,o)=>a+o.collected,0);
-  const live=isLive(),ago=S.loc?Math.round((Date.now()-S.loc.ts)/60000):null;
-  return`<h2 class="brand">TRUSEA DELIVERY DASHBOARD</h2>
-  <div class="stats">
-   <div class="stat"><b>${t.length}</b><span>Today's Orders</span></div>
-   <div class="stat"><b>${c('Pending')}</b><span>Pending</span></div>
-   <div class="stat"><b>${c('Out')}</b><span>Out for Delivery</span></div>
-   <div class="stat"><b>${c('Delivered')}</b><span>Delivered</span></div>
-   <div class="stat"><b>${os.length}</b><span>Total Orders</span></div>
-  </div>
-  <div class="stats">
-   <div class="stat big"><b>${inr(tot)}</b><span>Total Collection</span></div>
-   <div class="stat"><b>${inr(sum('UPI'))}</b><span>UPI</span></div>
-   <div class="stat"><b>${inr(sum('Cash'))}</b><span>Cash</span></div>
-  </div>
-  <div class="panel"><h3>Delivery Boy Location</h3>
-   <div><b>${esc(S.loc?S.loc.name:'TruSea Delivery Boy')}</b> <span class="badge ${live?'on-b':'off-b'}">Location Sharing: ${live?'ON':'OFF'}</span></div>
-   <p style="color:var(--mute);margin:8px 0">${S.loc?`📍 Last update ${ago<1?'just now':ago+' min ago'}`+(live?'':'. Sharing has stopped, so this is the last known position.'):'No location received yet. The delivery boy must log in and allow location.'}</p>
-   <button class="btn alt" onclick="go('map')">See on map</button></div>
-  <h3>Recent orders</h3><div class="grid">${os.slice(0,6).map(card).join('')||'<div class="empty">No orders yet. Add a row in your Google Sheet.</div>'}</div>`;
-}
-function ordersView(os){
-  const f=S.filter,list=f==='All'?os:os.filter(o=>o.status===f);
-  return`<div class="chips">${['All','Pending','Out','Delivered','Cancelled'].map(k=>`<button class="${f===k?'on':''}" onclick="S.filter='${k}';render()">${k==='All'?'All':LBL[k]}</button>`).join('')}</div>
-  <div class="grid">${list.map(card).join('')||'<div class="empty">No orders with this status.</div>'}</div>`;
-}
-function routeView(os){
-  const act=os.filter(o=>o.status==='Pending'||o.status==='Out'),done=os.filter(o=>o.status==='Delivered'||o.status==='Cancelled');
-  return`<h2>TODAY'S DELIVERY</h2>
-  ${S.geo!=='on'?`<div class="panel" style="border-color:var(--coral)">Location sharing is off. Tap the red badge at the top to allow location so the office can see where you are. Sharing only works while this page stays open and GPS is on.</div>`:''}
-  <div class="grid">${act.map((o,i)=>card(o,i+1)).join('')||'<div class="empty">All deliveries are done.</div>'}</div>
-  ${done.length?`<h3 style="margin-top:18px">Completed</h3><div class="grid">${done.map(card).join('')}</div>`:''}`;
-}
-function card(o,n){
-  const k=esc(o.no),boy=S.user.role==='boy';
-  return`<div class="card s-${o.status}" onclick="detail('${k}')">
-   <div class="top"><span>${n?n+'. ':''}${k}</span><span>${ST[o.status]} ${LBL[o.status]}</span></div>
-   <h4><a href="${navUrl(o)}" target="_blank" rel="noopener" onclick="stop(event)" style="color:inherit;text-decoration:underline dotted">${esc(o.name)}</a></h4>
-   <div class="row">${esc(o.address)}</div><div class="row">📱 ${esc(o.mobile)}</div>
-   <div class="amt">${inr(o.amount)}</div>
-   <div class="acts" onclick="stop(event)">
-    <a class="btn alt" href="${navUrl(o)}" target="_blank" rel="noopener">${boy?'OPEN MAP':'VIEW MAP'}</a>
-    <a class="btn alt" href="tel:${esc(o.mobile)}">CALL CUSTOMER</a>
-    ${boy&&o.status==='Pending'?`<button class="btn" onclick="saveOrder('${k}',{status:'Out'})">START DELIVERY</button>`:''}
-    ${boy&&(o.status==='Pending'||o.status==='Out')?`<button class="btn ok" onclick="payForm('${k}','deliver')">✓ DELIVERED</button>`:''}
-    <button class="btn alt" onclick="detail('${k}')">ORDER DETAILS</button>
-   </div></div>`;
-}
-
-/* ============ ORDER DETAIL & PAYMENT ============ */
-function detail(no){
-  const o=S.orders.find(x=>x.no===no),boy=S.user.role==='boy';
-  const kv=(a,b)=>`<div class="kv"><span>${a}</span><b>${b}</b></div>`;
-  openM(`<h2 class="brand">${esc(o.no)}</h2>
-   ${kv('Customer',esc(o.name))}${kv('Mobile',esc(o.mobile))}${kv('Address',esc(o.address))}
-   ${kv('Order amount',inr(o.amount))}${kv('Status',ST[o.status]+' '+LBL[o.status])}
-   ${kv('Collected',o.collected?inr(o.collected)+' ('+esc(o.method)+')':'Not yet')}
-   ${kv('Delivered on',o.time?esc(o.date)+' '+esc(o.time):'-')}${kv('Delivery boy',esc(o.boy)||'-')}${kv('Remarks',esc(o.remarks)||'-')}
-   <div class="acts"><a class="btn" href="${navUrl(o)}" target="_blank" rel="noopener">📍 NAVIGATE TO CUSTOMER</a><a class="btn alt" href="tel:${esc(o.mobile)}">📞 CALL CUSTOMER</a></div>
-   <div class="acts">
-   ${boy&&(o.status==='Pending'||o.status==='Out')?`<button class="btn ok" onclick="payForm('${o.no}','deliver')">✓ DELIVERED</button>`:''}
-   ${boy&&o.status==='Delivered'&&!o.collected?`<button class="btn warn" onclick="payForm('${o.no}','pay')">MARK PAYMENT COLLECTED</button>`:''}
-   ${boy&&o.status!=='Delivered'&&o.status!=='Cancelled'?`<button class="btn alt" onclick="if(confirm('Cancel this order?')){saveOrder('${o.no}',{status:'Cancelled'});closeM()}">CANCEL ORDER</button>`:''}
-   <button class="btn alt" onclick="closeM()">CLOSE</button></div>`);
-}
-function payForm(no,mode){
-  const o=S.orders.find(x=>x.no===no),d=mode==='deliver';
-  openM(`<h2>${d?'✓ DELIVERED':'PAYMENT COLLECTION'}</h2>
-   <div class="kv"><span>${esc(o.no)} · ${esc(o.name)}</span><b>Order Amount: ${inr(o.amount)}</b></div>
-   <label>Payment</label>
-   <div class="radio"><label><input type="radio" name="pm" value="Cash">Cash</label><label><input type="radio" name="pm" value="UPI">UPI</label></div>
-   <label for="pa">Amount Collected (₹)</label><input id="pa" type="number" inputmode="numeric" value="${o.amount}">
-   <label for="pr">Remarks (optional)</label><textarea id="pr" rows="2">${esc(o.remarks)}</textarea>
-   <div class="err" id="perr"></div>
-   <div class="acts"><button class="btn ok" onclick="confirmPay('${no}',${d})">${d?'CONFIRM DELIVERY':'MARK PAYMENT COLLECTED'}</button><button class="btn alt" onclick="closeM()">BACK</button></div>`);
-}
-function confirmPay(no,d){
-  const m=document.querySelector('input[name=pm]:checked'),a=Number($('pa').value);
-  if(!m){$('perr').textContent='Select Cash or UPI.';return}
-  if(!(a>=0)){$('perr').textContent='Enter the amount collected.';return}
-  const n=new Date(),patch={collected:a,method:m.value,remarks:$('pr').value.trim()};
-  if(d)Object.assign(patch,{status:'Delivered',date:n.toISOString().slice(0,10),time:n.toTimeString().slice(0,5)});
-  saveOrder(no,patch);closeM();toast(d?'Delivery confirmed and saved.':'Payment saved.');
-}
-
-/* ============ MAP ============ */
-function drawMap(){
-  if(!S.map){
-    S.map=L.map('map').setView([12.98,80.2],11);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(S.map);
-    S.layer=L.layerGroup().addTo(S.map);
+/* ---------- API ---------- */
+async function api(action, data) {
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ action: action, token: S.token }, data || {})) });
+  const j = await res.json();
+  if (!j.ok) {
+    if (j.code === 'AUTH') { S.token = null; S.user = null; S.msg = { t: j.error, err: true }; render(); }
+    throw new Error(j.error || 'Request failed');
   }
-  setTimeout(()=>S.map.invalidateSize(),50);
-  S.layer.clearLayers();const pts=[];
-  const pin=c=>L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:${c};border:3px solid #fff;box-shadow:0 0 0 1px #0006"></div>`,iconSize:[18,18]});
-  const col={Pending:'#e08a1e',Out:'#2a6fdb',Delivered:'#1f9d55',Cancelled:'#d13b3b'};
-  mine().filter(o=>o.lat&&o.lng).forEach(o=>{
-    L.marker([o.lat,o.lng],{icon:pin(col[o.status]),title:o.no}).addTo(S.layer).bindPopup(
-     `<b>${esc(o.no)} - ${esc(o.name)}</b><br>📱 ${esc(o.mobile)}<br>${esc(o.address)}<br>${inr(o.amount)} · ${LBL[o.status]}<br><a href="${navUrl(o)}" target="_blank" rel="noopener"><b>NAVIGATE</b></a>`);
-    pts.push([o.lat,o.lng]);
+  return j;
+}
+function toast(t, err) { S.msg = { t: t, err: !!err }; render(); setTimeout(() => { if (S.msg && S.msg.t === t) { S.msg = null; render(); } }, 6000); }
+async function run(fn, okText) {
+  if (S.busy) return;
+  S.busy = true; render();
+  try { await fn(); if (okText) toast(okText); } catch (e) { toast(e.message, true); }
+  S.busy = false;
+  try { await refresh(); } catch (e) { S.error = e.message; render(); }
+}
+
+/* ---------- location (app works only while phone location is ON) ---------- */
+function getPos(o) {
+  return new Promise((res, rej) => {
+    if (!navigator.geolocation) return rej({ code: 0 });
+    navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }), rej,
+      Object.assign({ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }, o || {}));
   });
-  if(S.loc){
-    L.marker([S.loc.lat,S.loc.lng],{icon:L.divIcon({className:'',html:'<div style="font-size:28px;line-height:28px">🛵</div>',iconSize:[28,28]})}).addTo(S.layer)
-     .bindPopup(`<b>${esc(S.loc.name)}</b><br>📍 Current location<br>Updated ${new Date(S.loc.ts).toLocaleTimeString()}`);
-    pts.push([S.loc.lat,S.loc.lng]);
-  }
-  if(pts.length&&!S.fit){S.map.fitBounds(pts,{padding:[40,40],maxZoom:15});S.fit=true}
+}
+function locMsg(e) {
+  return ({ 0: 'This browser does not support location.', 1: 'Location permission is blocked. Allow location for this site in the browser settings.',
+    2: 'Phone location (GPS) is OFF. Turn it ON.', 3: 'Could not get your location in time. Check GPS signal and retry.' })[e && e.code] || 'Could not get location.';
+}
+async function checkLoc() {
+  const was = S.loc.ok;
+  try { await getPos({ enableHighAccuracy: false, maximumAge: 30000 }); S.loc = { ok: true, msg: '' }; }
+  catch (e) { S.loc = { ok: false, msg: locMsg(e) }; }
+  if (was !== S.loc.ok) { render(); if (S.loc.ok && S.user) refresh().catch(() => {}); }
+}
+async function tick() {   // every interval: re-check location; send position while a delivery staff is checked in
+  if (!S.user) return checkLoc();
+  if (S.user.canDeliver && S.att.state === 'IN') {
+    try {
+      const p = await getPos();
+      if (!S.loc.ok) { S.loc = { ok: true, msg: '' }; render(); }
+      await api('ping', p);
+    } catch (e) { if (e.code !== undefined) { S.loc = { ok: false, msg: locMsg(e) }; render(); } }
+  } else await checkLoc();
+}
+let timer = null;
+function startTimer() { clearInterval(timer); timer = setInterval(tick, Math.max(30, S.cfg.intervalSec || 60) * 1000); }
+
+/* ---------- dialogs ---------- */
+function dialog(title, body, withInput, okText) {
+  return new Promise(res => {
+    const d = document.createElement('div'); d.className = 'dlg';
+    d.innerHTML = '<div><h2>' + h(title) + '</h2><p class="mute">' + body + '</p>' + (withInput ? '<textarea rows="3" id="dlgIn"></textarea>' : '') +
+      '<button class="btn" id="dlgOk">' + h(okText || 'OK') + '</button>' + (withInput ? '<button class="btn sec" id="dlgNo">Cancel</button>' : '') + '</div>';
+    document.body.appendChild(d);
+    const done = v => { d.remove(); res(v); };
+    d.querySelector('#dlgOk').onclick = () => done(withInput ? d.querySelector('#dlgIn').value.trim() : true);
+    if (withInput) d.querySelector('#dlgNo').onclick = () => done(null);
+  });
 }
 
-/* ============ INIT ============ */
-const saved=sessionStorage.getItem('ts_user');
-if(saved&&CFG.USERS[saved]){S.user=CFG.USERS[saved];S.tab=S.user.role==='admin'?'dash':'route';start()}
+/* ---------- data ---------- */
+async function refresh() {
+  if (!S.user || !S.loc.ok) return;
+  S.error = '';
+  const me = await api('me'); S.att = me.att; S.cfg = me.cfg;
+  if (S.user.manager) {
+    if (S.tab === 'deliveries' || S.tab === 'today') { const o = await api('orders', { date: S.date || today() }); S.orders = o.orders; S.noDate = o.noDate; }
+    if (S.tab !== 'reports') S.team = (await api('team')).staff;
+    if (S.tab === 'reports') S.report = (await api('report', { month: S.month || today().slice(0, 7) })).report;
+  } else {
+    if (S.user.canDeliver) { const o = await api('orders', { date: today() }); S.orders = o.orders; }
+    S.myMonth = (await api('myMonth', { month: today().slice(0, 7) })).rows;
+  }
+  render();
+}
+
+async function doLogin() {
+  const id = $('#lid').value, pin = $('#lpin').value;
+  if (!id || !pin) return toast('Choose your name and enter PIN', true);
+  S.busy = true; render();
+  try {
+    const j = await api('login', { staffId: id, pin: pin });
+    S.token = j.token; S.user = j.user; S.cfg = j.cfg; S.tab = 'today'; S.msg = null; S.date = today(); S.month = today().slice(0, 7);
+    startTimer();
+  } catch (e) { S.msg = { t: e.message, err: true }; }
+  S.busy = false; render();
+  if (S.user) { try { await refresh(); } catch (e) { S.error = e.message; render(); } }
+}
+function logout() { api('logout').catch(() => {}); S.token = null; S.user = null; S.orders = S.team = S.report = null; S.msg = null; render(); }
+
+async function attendanceAction(kind) {
+  await run(async () => { const p = await getPos(); await api(kind, p); }, kind === 'checkIn' ? 'Checked in' : 'Checked out');
+}
+
+async function setStatus(id, status) {
+  let reason = '';
+  if (status === 'Failed' || status === 'Cancelled' || S.user.manager) {
+    reason = await dialog(status === 'Failed' ? 'Why was delivery not completed?' : 'Reason for ' + status, S.user.manager ? 'Required for failures, cancellations and out-of-flow changes.' : 'Required.', true, 'Save');
+    if (reason === null) return;
+  }
+  await run(async () => {
+    let p = {}; if (status === 'Delivered') { try { p = await getPos(); } catch (e) {} }
+    await api('setStatus', { orderId: id, status: status, reason: reason, lat: p.lat, lng: p.lng, acc: p.acc });
+  }, id + ': ' + status);
+}
+async function assign(id, staffId) { await run(() => api('assign', { orderId: id, staffId: staffId }), id + ' updated'); }
+
+/* ---------- views ---------- */
+function navUrl(o) {
+  const m = String(o.map || '').match(/https?:\/\/\S+/) || String(o.address || '').match(/https?:\/\/\S+/);
+  if (m) return m[0];
+  const a = String(o.address || '').trim();
+  return a && a.toLowerCase() !== 'home' ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a) : '';
+}
+function attCard() {
+  const a = S.att, st = a.state;
+  return '<div class="card"><h2>My attendance</h2><div>' + (st === 'IN' ? '<span class="badge b-IN">Checked in ' + tm(a.inTime) + '</span>' :
+    st === 'OUT' ? '<span class="badge">Checked out ' + tm(a.outTime) + '</span>' : '<span class="badge b-NONE">Not checked in</span>') + '</div>' +
+    (st === 'IN' ? '<button class="btn red" data-a="out"' + (S.busy ? ' disabled' : '') + '>Check out</button>' :
+      '<button class="btn" data-a="in"' + (S.busy ? ' disabled' : '') + '>' + (st === 'OUT' ? 'Check in again' : 'Check in') + '</button>') +
+    (S.user.canDeliver && st === 'IN' ? '<div class="mute" style="margin-top:6px">Location is shared every ' + (S.cfg.intervalSec || 60) + ' s while checked in. Keep this page open.</div>' : '') + '</div>';
+}
+function orderCard(o) {
+  const mgr = S.user.manager, mine = o.assignedTo === S.user.id, nav = navUrl(o);
+  const items = String(o.product).split('|').map(x => x.trim()).filter(Boolean);
+  const cod = String(o.pay).toLowerCase() === 'cod' && String(o.paid).toLowerCase() !== 'paid';
+  const sc = o.status === 'Out for Delivery' ? 'Out' : o.status;
+  let btns = '';
+  if (mine && o.status === 'Assigned') btns += '<button class="btn" data-a="st" data-id="' + h(o.id) + '" data-s="Out for Delivery">Start delivery</button>';
+  if (mine && o.status === 'Out for Delivery') btns += '<div class="row"><button class="btn" data-a="st" data-id="' + h(o.id) + '" data-s="Delivered">Delivered</button><button class="btn red" data-a="st" data-id="' + h(o.id) + '" data-s="Failed">Failed</button></div>';
+  if (mgr && o.status !== 'Delivered' && o.status !== 'Cancelled') {
+    const riders = (S.team || []).filter(t => t.canDeliver);
+    btns += '<div class="row" style="margin-top:8px"><select data-a="asg" data-id="' + h(o.id) + '"><option value="">Assign rider...</option>' + riders.map(t => '<option value="' + h(t.id) + '"' + (t.id === o.assignedTo ? ' selected' : '') + '>' + h(t.name) + '</option>').join('') + '<option value="-">Unassign</option></select>' +
+      '<select data-a="ovr" data-id="' + h(o.id) + '"><option value="">Set status...</option>' + ['Out for Delivery', 'Delivered', 'Failed', 'Cancelled'].filter(x => x !== o.status).map(x => '<option>' + x + '</option>').join('') + '</select></div>';
+  }
+  if (mgr) btns += '<button class="btn sec sm" style="margin-top:8px" data-a="hist" data-id="' + h(o.id) + '">History</button>';
+  return '<div class="card"><div class="row"><b>' + h(o.id) + '</b><span style="text-align:right"><span class="badge b-' + h(sc) + '">' + h(o.status) + '</span>' + (o.late ? ' <span class="badge b-late">earlier day</span>' : '') + '</span></div>' +
+    '<div><b>' + h(o.name) + '</b> · <a href="tel:' + h(String(o.phone).replace(/\s/g, '')) + '">' + h(o.phone || 'no phone') + '</a></div>' +
+    '<div>' + h(o.address) + '</div>' + (nav ? '<a class="btn sec" style="display:block;text-align:center;text-decoration:none;line-height:28px" target="_blank" rel="noopener" href="' + h(nav) + '">Navigate</a>' : '<div class="mute">No clear location: call the customer.</div>') +
+    '<ul class="items">' + items.map(i => '<li>' + h(i) + '</li>').join('') + '</ul>' +
+    '<div class="mute">' + (o.fish ? h(o.fish) + ' · ' : '') + '₹' + h(o.total) + ' · ' + h(o.pay) + ' ' + h(o.paid) + '</div>' +
+    (cod ? '<div style="color:var(--red);font-weight:600">Collect ₹' + h(o.total) + ' (COD)</div>' : '') +
+    (o.remarks ? '<div class="mute">Note: ' + h(o.remarks) + '</div>' : '') + (o.reason ? '<div class="mute">Reason: ' + h(o.reason) + '</div>' : '') +
+    (mgr ? '<div class="mute">Rider: ' + h(o.assignedName || 'not assigned') + '</div>' : '') + btns + '</div>';
+}
+function ordersBlock() {
+  if (!S.orders) return '<div class="card mute">Loading orders...</div>';
+  let l = S.orders;
+  if (S.filter === 'MINE') l = l.filter(o => o.assignedTo === S.user.id);
+  if (S.filter === 'UN') l = l.filter(o => !o.assignedTo);
+  return (l.length ? l.map(orderCard).join('') : '<div class="card mute">No orders to show.</div>');
+}
+function kpis() {
+  const o = S.orders || [], c = f => o.filter(f).length;
+  const k = [['Total', o.length], ['Not assigned', c(x => !x.assignedTo && x.status === 'Pending')], ['Assigned', c(x => x.status === 'Assigned')],
+    ['Out', c(x => x.status === 'Out for Delivery')], ['Delivered', c(x => x.status === 'Delivered')], ['Failed', c(x => x.status === 'Failed')]];
+  return '<div class="kpis">' + k.map(x => '<div class="kpi"><b>' + x[1] + '</b><small>' + x[0] + '</small></div>').join('') + '</div>';
+}
+function teamTable() {
+  if (!S.team) return '<div class="card mute">Loading...</div>';
+  return '<div class="card tbl"><table><tr><th>Name</th><th>Today</th><th>In</th><th>Out</th><th>Location</th>' + (S.tab === 'team' ? '<th></th>' : '') + '</tr>' +
+    S.team.map(t => '<tr><td>' + h(t.name) + '<div class="mute">' + h(t.role) + '</div></td><td><span class="badge b-' + t.state + '">' + (t.state === 'IN' ? 'In' : t.state === 'OUT' ? 'Out' : 'Absent') + '</span></td><td>' + tm(t.inTime) + '</td><td>' + tm(t.outTime) + '</td><td>' +
+      (t.loc ? mapLink(t.loc.lat, t.loc.lng) + '<div class="mute">' + t.loc.ageMin + ' min ago' + (t.loc.stale ? ' (stale)' : '') + '</div>' : '-') + '</td>' +
+      (S.tab === 'team' ? '<td><button class="btn sec sm" data-a="pin" data-id="' + h(t.id) + '">Reset PIN</button></td>' : '') + '</tr>').join('') + '</table></div>';
+}
+function reportView() {
+  const r = S.report;
+  let x = '<div class="card"><h2>Month</h2><input type="month" id="mon" value="' + h(S.month) + '"></div>';
+  if (!r) return x + '<div class="card mute">Loading...</div>';
+  x += '<div class="card tbl"><h2>Summary</h2><table><tr><th>Name</th><th>Days</th><th>Hours</th><th>Missing out</th><th>Logins</th><th>Delivered</th><th>Failed</th></tr>' +
+    r.summary.map(s => '<tr><td>' + h(s.name) + '</td><td>' + s.days + '</td><td>' + s.hours + '</td><td>' + s.missing + '</td><td>' + s.logins + '</td><td>' + s.delivered + '</td><td>' + s.failed + '</td></tr>').join('') + '</table></div>' +
+    '<div class="row"><button class="btn sec" data-a="csv">Download CSV</button><button class="btn sec" data-a="mail">Email this report</button></div>' +
+    '<div class="card tbl" style="margin-top:12px"><h2>Attendance details</h2>' + (r.rows.length ? '<table><tr><th>Date</th><th>Name</th><th>In</th><th>In loc</th><th>Out</th><th>Out loc</th><th>Hours</th><th>Status</th></tr>' +
+    r.rows.map(a => '<tr><td>' + dm(a.date) + '</td><td>' + h(a.name) + '</td><td>' + tm(a.inTime) + '</td><td>' + mapLink(a.inLat, a.inLng) + '</td><td>' + tm(a.outTime) + '</td><td>' + mapLink(a.outLat, a.outLng) + '</td><td>' + a.hours + '</td><td>' + h(a.status) + '</td></tr>').join('') + '</table>' : '<div class="mute">No attendance this month.</div>') + '</div>' +
+    '<div class="card tbl"><h2>Logins (' + r.logins.length + ')</h2>' + (r.logins.length ? '<table><tr><th>Date</th><th>Time</th><th>Staff</th></tr>' + r.logins.slice(0, 100).map(l => '<tr><td>' + dm(l.time) + '</td><td>' + tm(l.time) + '</td><td>' + h((r.summary.find(s => s.id === l.id) || {}).name || l.id) + '</td></tr>').join('') + '</table>' : '<div class="mute">No logins.</div>') + '</div>';
+  return x;
+}
+function csvDownload() {
+  const r = S.report, c = v => { let s = String(v == null ? '' : v); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  const rows = [['Date', 'Staff ID', 'Name', 'Role', 'Check-in', 'In Lat', 'In Lng', 'Check-out', 'Out Lat', 'Out Lng', 'Hours', 'Status']].concat(r.rows.map(a => [a.date, a.id, a.name, a.role, a.inTime, a.inLat, a.inLng, a.outTime, a.outLat, a.outLng, a.hours, a.status]));
+  const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([rows.map(x => x.map(c).join(',')).join('\n')], { type: 'text/csv' }));
+  el.download = 'TruSea_Attendance_' + r.month + '.csv'; el.click();
+}
+
+function render() {
+  const app = $('#app'), msg = S.msg ? '<div class="msg' + (S.msg.err ? ' err' : '') + '">' + h(S.msg.t) + '</div>' : '';
+  if (S.loc.ok === null) { app.innerHTML = '<div class="gate"><h2>TruSea Ops</h2><p class="mute">Checking location...</p></div>'; return; }
+  if (S.loc.ok === false) {
+    app.innerHTML = '<div class="gate"><h2>Location is OFF</h2><p>' + h(S.loc.msg) + '</p><p class="mute">This app works only when phone location is ON.</p><button class="btn" data-a="retry">Retry</button></div>'; return;
+  }
+  if (!S.user) {
+    if (!S.staffList) { app.innerHTML = '<div class="gate"><h2>TruSea Ops</h2><p class="mute">Loading...</p></div>'; return; }
+    app.innerHTML = '<div class="wrap" style="max-width:420px"><h2 style="font-size:22px;margin-top:24px">TruSea Ops</h2>' + msg + '<div class="card"><label class="mute">Name</label><select id="lid"><option value="">Select...</option>' +
+      S.staffList.map(s => '<option value="' + h(s.id) + '">' + h(s.name) + '</option>').join('') + '</select><label class="mute" style="display:block;margin-top:10px">PIN</label><input id="lpin" type="password" inputmode="numeric" autocomplete="off">' +
+      '<button class="btn" data-a="login"' + (S.busy ? ' disabled' : '') + '>Login</button></div></div>'; return;
+  }
+  const mgr = S.user.manager;
+  let body = '';
+  if (mgr) {
+    if (S.tab === 'today') body = attCard() + kpis() + (S.noDate ? '<div class="card mute">' + S.noDate + ' confirmed order(s) have no Expected Delivery Date.</div>' : '') + '<h2>Staff today</h2>' + teamTable();
+    else if (S.tab === 'deliveries') body = '<div class="row"><input type="date" id="dsel" value="' + h(S.date) + '"><select id="flt"><option value="ALL"' + (S.filter === 'ALL' ? ' selected' : '') + '>All</option><option value="UN"' + (S.filter === 'UN' ? ' selected' : '') + '>Unassigned</option><option value="MINE"' + (S.filter === 'MINE' ? ' selected' : '') + '>Mine</option></select><button class="btn sec sm" data-a="ref">Refresh</button></div><div style="height:10px"></div>' + ordersBlock();
+    else if (S.tab === 'team') body = teamTable();
+    else body = reportView();
+  } else {
+    body = attCard() + (S.user.canDeliver ? '<div class="row" style="margin-bottom:8px"><h2 style="margin:0">My deliveries today</h2><button class="btn sec sm" data-a="ref" style="flex:0">Refresh</button></div>' + ordersBlock() : '') +
+      '<div class="card tbl"><h2>This month</h2>' + (S.myMonth && S.myMonth.length ? '<table><tr><th>Date</th><th>In</th><th>Out</th><th>Hours</th></tr>' + S.myMonth.map(a => '<tr><td>' + dm(a.date) + '</td><td>' + tm(a.inTime) + '</td><td>' + tm(a.outTime) + '</td><td>' + a.hours + '</td></tr>').join('') + '</table>' : '<div class="mute">No records yet.</div>') + '</div>';
+  }
+  const tabs = mgr ? '<div class="tabs">' + [['today', 'Today'], ['deliveries', 'Deliveries'], ['team', 'Team'], ['reports', 'Reports']].map(t => '<button data-a="tab" data-t="' + t[0] + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>').join('') + '</div>' : '';
+  app.innerHTML = '<div class="top"><div><b>' + h(S.user.name) + '</b><small>' + h(S.user.role) + '</small></div><button class="btn sec sm" data-a="logout">Logout</button></div>' + tabs +
+    '<div class="wrap">' + msg + (S.error ? '<div class="msg err">' + h(S.error) + ' <a href="#" data-a="ref">Retry</a></div>' : '') + body + '</div>';
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-a]'); if (!t) return;
+  const a = t.dataset.a, id = t.dataset.id;
+  if (a === 'retry') { S.loc.ok = null; render(); await checkLoc(); if (S.loc.ok === null) render(); }
+  else if (a === 'login') doLogin();
+  else if (a === 'logout') logout();
+  else if (a === 'in') attendanceAction('checkIn');
+  else if (a === 'out') attendanceAction('checkOut');
+  else if (a === 'st') setStatus(id, t.dataset.s);
+  else if (a === 'tab') { S.tab = t.dataset.t; S.error = ''; render(); refresh().catch(x => { S.error = x.message; render(); }); }
+  else if (a === 'ref') { e.preventDefault(); refresh().catch(x => { S.error = x.message; render(); }); }
+  else if (a === 'csv') csvDownload();
+  else if (a === 'mail') run(async () => { const j = await api('emailReport', { month: S.month }); toast('Sent to ' + j.to); });
+  else if (a === 'pin') { if (await dialog('Reset PIN?', 'A new PIN will be created. The old one stops working.', false, 'Reset')) run(async () => { const j = await api('resetPin', { staffId: id }); await dialog('New PIN for ' + j.name, '<b style="font-size:24px">' + h(j.pin) + '</b><br>Note it now. It is shown only once.', false, 'Done'); }); }
+  else if (a === 'hist') { try { const j = await api('history', { orderId: id }); await dialog('History ' + id, j.rows.length ? j.rows.map(r => dm(r.time) + ' ' + tm(r.time) + ' · ' + h(r.by) + ' · ' + h(r.action) + ' · ' + h(r.details)).join('<br>') : 'No history yet.', false, 'Close'); } catch (x) { toast(x.message, true); } }
+});
+document.addEventListener('change', e => {
+  const t = e.target, a = t.dataset.a;
+  if (a === 'asg' && t.value) assign(t.dataset.id, t.value === '-' ? '' : t.value);
+  else if (a === 'ovr' && t.value) setStatus(t.dataset.id, t.value);
+  else if (t.id === 'dsel') { S.date = t.value || today(); S.orders = null; render(); refresh().catch(x => { S.error = x.message; render(); }); }
+  else if (t.id === 'flt') { S.filter = t.value; render(); }
+  else if (t.id === 'mon') { S.month = t.value || today().slice(0, 7); S.report = null; render(); refresh().catch(x => { S.error = x.message; render(); }); }
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { S.user ? tick() : checkLoc(); } });
+if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then(p => { p.onchange = () => checkLoc(); }).catch(() => {});
+
+(async function init() {
+  render();
+  await checkLoc();
+  render();
+  try { S.staffList = (await api('staffList')).staff; } catch (e) { S.msg = { t: 'Cannot reach server: ' + e.message, err: true }; S.staffList = []; }
+  render();
+  startTimer();
+})();
 </script>
-
-<!--
-GOOGLE SHEET SETUP (one time)
-1. Sheet 1 header row (exact): Order Number | Customer Name | Mobile Number | Address | Latitude | Longitude | Order Amount | Delivery Status | Amount Collected | Payment Method | Delivery Date | Delivery Time | Delivery Boy | Remarks
-2. Add a second tab named "Location" with header: Name | Lat | Lng | Timestamp
-3. Extensions > Apps Script. Paste the code below, then Deploy > New deployment > Web app (Execute as: Me, Access: Anyone). Copy the URL into CFG.API above.
-
-const key=h=>String(h).toLowerCase().replace(/[^a-z0-9]/g,'');
-function sh(){return SpreadsheetApp.getActive().getSheets()[0]}
-function doGet(){
-  const v=sh().getDataRange().getValues(),h=v.shift().map(key);
-  const orders=v.filter(r=>r[0]).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i] instanceof Date?Utilities.formatDate(r[i],'Asia/Kolkata','yyyy-MM-dd'):r[i]);return o});
-  const l=SpreadsheetApp.getActive().getSheetByName('Location').getRange(2,1,1,4).getValues()[0];
-  const location=l[0]?{name:l[0],lat:l[1],lng:l[2],ts:l[3]}:null;
-  return ContentService.createTextOutput(JSON.stringify({orders,location})).setMimeType(ContentService.MimeType.JSON);
-}
-function doPost(e){
-  const d=JSON.parse(e.postData.contents);
-  if(d.action==='loc'){SpreadsheetApp.getActive().getSheetByName('Location').getRange(2,1,1,4).setValues([[d.loc.name,d.loc.lat,d.loc.lng,d.loc.ts]])}
-  if(d.action==='update'){
-    const s=sh(),v=s.getDataRange().getValues(),h=v[0].map(key);
-    const map={status:'deliverystatus',collected:'amountcollected',method:'paymentmethod',date:'deliverydate',time:'deliverytime',remarks:'remarks'};
-    const label={Out:'Out for Delivery'};
-    for(let r=1;r<v.length;r++) if(String(v[r][0]).toUpperCase()===d.no){
-      for(const k in d.patch){ if(!map[k])continue;
-        s.getRange(r+1,h.indexOf(map[k])+1).setValue(k==='status'?(label[d.patch[k]]||d.patch[k]):d.patch[k]); }
-      break;
-    }
-  }
-  return ContentService.createTextOutput('ok');
-}
--->
 </body>
 </html>
